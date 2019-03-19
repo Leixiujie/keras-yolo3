@@ -171,22 +171,11 @@ class YOLO(object):
             # My kingdom for a good redistributable image drawing library.
             #ttt = 0
             for i in range(thickness):
-                print('厚度是：' + str(thickness))
                 
                 draw.rectangle(
                     [left + i, top + i, right - i, bottom - i],
                     outline=self.colors[c])
-                '''
-                if ttt == 0:
-                    rec_point.append(left + i)
-                    rec_point.append(right - i)
-                    rec_point.append(bottom - i)
-                    rec_point.append(top + i)
-                    rec_point.append(c)
-                    rec_point.append(score)
-                    classes_and_rec_point.append(rec_point)
-                ttt += 1
-                '''
+                
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + label_size)],
                 fill=self.colors[c])

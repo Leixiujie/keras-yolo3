@@ -11,7 +11,7 @@ def detect_img(yolo):
     iii = 0
     json_file = {}
     all_pic_info = []
-    for file_name in files[:2]:
+    for file_name in files[:]:
         '''
         放入一张图片测试，生成数据集是否正常
         
