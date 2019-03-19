@@ -9,7 +9,7 @@ logs/
 __pycache__/
 *.py[cod]
 *$py.class
-
+font
 # C extensions
 *.so
 datas
