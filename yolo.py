@@ -20,9 +20,9 @@ from keras.utils import multi_gpu_model
 
 class YOLO(object):
     _defaults = {
-        "model_path": 'model_data/yolo.h5',
+        "model_path": './logs/000/trained_weights_final.h5',
         "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/coco_classes.txt',
+        "classes_path": 'model_data/jinnan_classes.txt',
         "score" : 0.3,
         "iou" : 0.45,
         "model_image_size" : (416, 416),
@@ -73,6 +73,7 @@ class YOLO(object):
                 if is_tiny_version else yolo_body(Input(shape=(None,None,3)), num_anchors//3, num_classes)
             self.yolo_model.load_weights(self.model_path) # make sure model, anchors and classes match
         else:
+            print('loaded_model')
             assert self.yolo_model.layers[-1].output_shape[-1] == \
                 num_anchors/len(self.yolo_model.output) * (num_classes + 5), \
                 'Mismatch between model and given anchor and class sizes'
@@ -129,8 +130,14 @@ class YOLO(object):
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
-
+        
+        
+        
+        
+        classes_and_rec_point = []
         for i, c in reversed(list(enumerate(out_classes))):
+            rec_point = []
+            
             predicted_class = self.class_names[c]
             box = out_boxes[i]
             score = out_scores[i]
@@ -144,6 +151,16 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            #传出参数
+            
+            rec_point.append(left)
+            rec_point.append(right)
+            rec_point.append(bottom)
+            rec_point.append(top)
+            rec_point.append(c)
+            rec_point.append(score)
+            classes_and_rec_point.append(rec_point)
+            
             print(label, (left, top), (right, bottom))
 
             if top - label_size[1] >= 0:
@@ -152,19 +169,34 @@ class YOLO(object):
                 text_origin = np.array([left, top + 1])
 
             # My kingdom for a good redistributable image drawing library.
+            #ttt = 0
             for i in range(thickness):
+                print('厚度是：' + str(thickness))
+                
                 draw.rectangle(
                     [left + i, top + i, right - i, bottom - i],
                     outline=self.colors[c])
+                '''
+                if ttt == 0:
+                    rec_point.append(left + i)
+                    rec_point.append(right - i)
+                    rec_point.append(bottom - i)
+                    rec_point.append(top + i)
+                    rec_point.append(c)
+                    rec_point.append(score)
+                    classes_and_rec_point.append(rec_point)
+                ttt += 1
+                '''
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + label_size)],
                 fill=self.colors[c])
+            
             draw.text(text_origin, label, fill=(0, 0, 0), font=font)
             del draw
 
         end = timer()
-        print(end - start)
-        return image
+        print('共花费时间：' + str(end - start) + 's')
+        return image,classes_and_rec_point
 
     def close_session(self):
         self.sess.close()
@@ -209,4 +241,8 @@ def detect_video(yolo, video_path, output_path=""):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     yolo.close_session()
-
+'''
+if __name__ == '__main__':
+    image = Image.open('datas/train/jinnan2_round1_train_20190305/restricted/190109_180542_00154168.jpg')
+    YOLO.detect_image(image=image)
+'''

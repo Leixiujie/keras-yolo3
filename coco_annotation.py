@@ -1,19 +1,32 @@
 import json
 from collections import defaultdict
 
+base_path = './datas/train/jinnan2_round1_train_20190305/'
+
+
 name_box_id = defaultdict(list)
 id_name = dict()
 f = open(
-    "mscoco2017/annotations/instances_train2017.json",
+    base_path + 'train_no_poly.json',
     encoding='utf-8')
 data = json.load(f)
 
+image_infos = data['images']
 annotations = data['annotations']
-for ant in annotations:
-    id = ant['image_id']
-    name = 'mscoco2017/train2017/%012d.jpg' % id
-    cat = ant['category_id']
+now = 0
 
+for info in image_infos:
+    now += 1
+
+print(now)
+
+'''
+for ant in annotations:
+    iid = ant['image_id']
+    img_name = image_infos[iid]['file_name']
+    
+    name = './datas/train/jinnan2_round1_train_20190305/restricted/' + img_name
+    cat = ant['category_id']
     if cat >= 1 and cat <= 11:
         cat = cat - 1
     elif cat >= 13 and cat <= 25:
@@ -32,7 +45,7 @@ for ant in annotations:
         cat = cat - 10
     elif cat >= 84 and cat <= 90:
         cat = cat - 11
-
+    
     name_box_id[name].append([ant['bbox'], cat])
 
 f = open('train.txt', 'w')
@@ -50,3 +63,4 @@ for key in name_box_id.keys():
         f.write(box_info)
     f.write('\n')
 f.close()
+'''

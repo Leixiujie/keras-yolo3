@@ -1,19 +1,82 @@
-import sys
+import os
 import argparse
 from yolo import YOLO, detect_video
 from PIL import Image
+import json
 
 def detect_img(yolo):
-    while True:
-        img = input('Input image filename:')
+    test_path = './datas/test/jinnan2_round1_test_a_20190306/'
+    for _,__,files in os.walk(test_path):
+        break
+    iii = 0
+    json_file = {}
+    all_pic_info = []
+    for file_name in files[:2]:
+        '''
+        放入一张图片测试，生成数据集是否正常
+        
+        iii += 1
+        if iii==2:
+            break
+        '''
+        img = test_path + file_name
+        print(img)
         try:
-            image = Image.open(img)
+            image = Image.open(img.strip())
         except:
             print('Open Error! Try again!')
             continue
         else:
-            r_image = yolo.detect_image(image)
-            r_image.show()
+            
+            r_image,infos = yolo.detect_image(image)
+            '''
+            此段程序为生成提交json结果代码
+            '''
+            
+            dics = []
+            
+            if(len(infos) == 0):
+                dics = []
+            for info in infos:
+                '''
+                #跳过置信度<0.4的
+                if info[5] <0.4:
+                    continue
+                '''
+                dic = {"xmin": info[0], "xmax": info[1], "ymin": info[3], "ymax": info[2], "label": info[4], "confidence": round(info[5],1)}
+                dics.append(dic)
+            
+            pic_info = {"filename": file_name, "rects": dics}
+            
+            all_pic_info.append(pic_info)
+            
+            
+            #r_image.save('./output/test.jpg')
+            #r_image.show()
+    json_file = {"results":all_pic_info}
+    
+    f = open('submit.json','w',encoding='utf-8')
+    #json_output = json.dumps(json_file)
+    
+    json_output = str(json_file)
+    
+    
+    #将转化之后的单引号变为双引号
+    str_to_write = ""
+    for char in json_output:
+        if char == "\'":
+            str_to_write = str_to_write + chr(34)
+        else:
+            str_to_write = str_to_write + char
+            
+            
+    
+    #把json_file写入文件
+    
+    #print(json_file)
+    f.write(str_to_write)
+    
+    f.close()
     yolo.close_session()
 
 FLAGS = None
@@ -45,7 +108,7 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '--image', default=False, action="store_true",
+        '--image', default=True, action="store_true",
         help='Image detection mode, will ignore all positional arguments'
     )
     '''
