@@ -157,7 +157,7 @@ class YOLO(object):
             rec_point.append(right)
             rec_point.append(bottom)
             rec_point.append(top)
-            rec_point.append(c)
+            rec_point.append(c+1)
             rec_point.append(score)
             classes_and_rec_point.append(rec_point)
             
